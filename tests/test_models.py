@@ -118,7 +118,7 @@ def test_invoice_creation():
     # Act
     invoice = Invoice(
         supplier_name=supplier_name,
-        invoce_number=invoice_number,
+        invoice_number=invoice_number,
         currency_code=currency_code,
         invoice_total=invoice_total,
         line_items=line_items,
@@ -127,7 +127,7 @@ def test_invoice_creation():
 
     # Assert
     assert invoice.supplier_name == supplier_name
-    assert invoice.invoce_number == invoice_number
+    assert invoice.invoice_number == invoice_number
     assert invoice.currency_code == currency_code
     assert invoice.invoice_total == invoice_total
     assert invoice.line_items == line_items
@@ -180,3 +180,15 @@ def test_invoice_reconciliation() -> None:
     assert invoice.calculated_total == Decimal('550.00')
     assert invoice.reconciliation_difference == Decimal('300.00')
     assert invoice.reconciliation_status == 'mismatched'
+
+
+def test_line_item_quantity_mismatch() -> None:
+    item = LineItem(
+        description='Industrial Trousers',
+        quantity=Decimal('2.4'),
+        quantity_raw='2,400',
+        unit_price=Decimal('5.97'),
+        line_amount=Decimal('14328.00'),
+    )
+
+    assert item.has_quantity_mismatch is True
