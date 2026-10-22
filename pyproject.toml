@@ -1,0 +1,52 @@
+[project]
+name = "elis-procurement-v2"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = []
+
+[project.scripts]
+elis-procurement-v2 = "elis_procurement_v2:main"
+
+[build-system]
+requires = ["uv_build>=0.12.7,<0.13.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+    "pytest-cov>=7.1.0",
+    "ruff>=0.17.1",
+    "taskipy>=1.14.1",
+    "tasky>=0.8.1",
+]
+
+[tool.ruff]
+line-length = 89
+target-version = "py314"
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I"]
+
+[tool.ruff.format]
+quote-style = "single"
+
+[tool.taskipy.tasks]
+lint = "ruff check ."
+format = "ruff check . --fix && ruff format ."
+format_check = "ruff format --check ."
+
+pre_test = "task lint"
+test = "pytest --cov=elis_procurement_v2 -vv"
+post_test = "coverage html"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.coverage.run]
+branch = true
+source = ["elis_procurement_v2"]
+
+[tool.coverage.report]
+show_missing = true
