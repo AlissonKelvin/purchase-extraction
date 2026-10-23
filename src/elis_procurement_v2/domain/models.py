@@ -96,4 +96,4 @@ class Invoice:
         if self.reconciliation_status != 'matched':
             return 'review_required'
 
-        return 'no_issued_detected'
+        return 'no_issues_detected'
