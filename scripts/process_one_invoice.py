@@ -1,0 +1,50 @@
+from pathlib import PurePosixPath
+
+from elis_procurement_v2.adapters.azure_blob_storage import (
+    AzureBlobStorage,
+)
+from elis_procurement_v2.adapters.azure_content_understanding import (
+    AzureContentUnderstanding,
+)
+from elis_procurement_v2.application.invoice_processor import (
+    process_invoice,
+)
+
+
+def main() -> None:
+    blob_name = 'NL_Alcochem Hygiene_pest control consumables.pdf'
+
+    storage = AzureBlobStorage()
+    analyzer = AzureContentUnderstanding()
+
+    print('1. Baixando PDF...')
+    pdf_bytes = storage.download_pdf(blob_name)
+
+    print('2. Analisando com Content Understanding...')
+    analysis = analyzer.analyze_pdf(pdf_bytes)
+
+    print('3. Processando fatura...')
+    result = process_invoice(analysis)
+    processed_blob_name = f'{PurePosixPath(blob_name).stem}.json'
+    processed_container = storage.container_processed
+
+    if processed_container is None:
+        raise ValueError('Processed container is not configured.')
+
+    storage.upload_json(
+        container_name=processed_container,
+        blob_name=processed_blob_name,
+        data=result,
+    )
+
+    print('JSON enviado para invoices-processed!')
+
+    print('--- Resultado ---')
+    print(f'Itens: {result["line_items_count"]}')
+    print(f'Cobranças: {result["charges_count"]}')
+    print(f'Reconciliação: {result["reconciliation_status"]}')
+    print(f'Revisão: {result["review_status"]}')
+
+
+if __name__ == '__main__':
+    main()

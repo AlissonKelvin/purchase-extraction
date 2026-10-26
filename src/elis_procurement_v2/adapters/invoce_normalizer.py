@@ -1,22 +1,31 @@
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 from typing import Any, Mapping
 
 from elis_procurement_v2.domain.models import Charge, Invoice, LineItem
 
 
 def to_decimal(value: str | int | float | None) -> Decimal | None:
-    if value is None:
+    if value is None or value == '':
         return None
-    return Decimal(str(value))
+
+    try:
+        number = Decimal(str(value))
+    except InvalidOperation, ValueError, TypeError:
+        return None
+
+    if not number.is_finite():
+        return None
+
+    return number
 
 
 def normalize_line_item(data: Mapping[str, Any]) -> LineItem:
     return LineItem(
         description=str(data.get('Description') or ''),
-        quantity=to_decimal(data.get('Quantity')) or Decimal('0'),
+        quantity=to_decimal(data.get('Quantity')),
         quantity_raw=str(data.get('QuantityRaw') or ''),
-        unit_price=to_decimal(data.get('UnitPrice')) or Decimal('0'),
-        line_amount=to_decimal(data.get('LineAmount')) or Decimal('0'),
+        unit_price=to_decimal(data.get('UnitPrice')),
+        line_amount=to_decimal(data.get('LineAmount')),
     )
 
 
@@ -29,10 +38,11 @@ def normalize_charge(data: Mapping[str, Any]) -> Charge:
 
 
 def normalize_invoice(data: Mapping[str, Any]) -> Invoice:
+    line_items = tuple(
+        normalize_line_item(item) for item in (data.get('LineItems') or [])
+    )
 
-    line_items = tuple(normalize_line_item(item) for item in data.get('LineItems', []))
-
-    charges = tuple(normalize_charge(charge) for charge in data.get('Charges', []))
+    charges = tuple(normalize_charge(charge) for charge in (data.get('Charges') or []))
 
     return Invoice(
         supplier_name=data.get('SupplierName'),

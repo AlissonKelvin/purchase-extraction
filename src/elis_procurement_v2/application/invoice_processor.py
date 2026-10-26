@@ -4,12 +4,14 @@ from typing import Any
 
 from elis_procurement_v2.adapters.content_understanding_adapter import (
     adapt_content_understanding,
+    adapt_invoice_schema,
 )
 from elis_procurement_v2.adapters.invoce_normalizer import normalize_invoice
 
 
 def process_invoice(response: Mapping[str, Any]):
     data = adapt_content_understanding(response)
+    data = adapt_invoice_schema(data)
     invoice = normalize_invoice(data)
 
     return serialize_decimal(

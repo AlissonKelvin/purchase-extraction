@@ -1,17 +1,19 @@
+# Credentials
+.env
+.env.*
+!.env.example
+
+# Confidential data
+data/private/
+tests/fixtures/private/
+
 # Python
 __pycache__/
-*.py[cod]
-*.egg-info/
-build/
-dist/
-
-# Virtual environments
+*.pyc
 .venv/
 
-# Testing and coverage
+# Test artifacts
 .pytest_cache/
 .ruff_cache/
 .coverage
 htmlcov/
-
-.env
