@@ -37,13 +37,21 @@ select = ["E4", "E7", "E9", "F", "I"]
 quote-style = "single"
 
 [tool.taskipy.tasks]
-lint = "ruff check ."
-format = "ruff check . --fix && ruff format ."
-format_check = "ruff format --check ."
 
-pre_test = "task lint"
-test = "pytest --cov=elis_procurement_v2 -vv"
-post_test = "coverage html"
+# Qualidade do código
+format = { cmd = "ruff format .", help = "Formata o codigo Python" }
+lint = { cmd = "ruff check .", help = "Verifica problemas com Ruff" }
+fix = { cmd = "ruff check . --fix", help = "Corrige problemas identificados pelo Ruff" }
+check = { cmd = "ruff format --check . && ruff check .", help = "Valida formatacao e lint" }
+test = { cmd = "pytest --cov=elis_procurement_v2 --cov-report=term-missing --cov-report=html", help = "Executa os testes com cobertura" }
+
+# Processamento das faturas
+invoice = { cmd = "python scripts/process_one_invoice.py", help = "Processa uma fatura informada por argumento" }
+batch = { cmd = "python scripts/process_batch.py", help = "Simula o processamento em lote" }
+batch_run = { cmd = "python scripts/process_batch.py --execute", help = "Executa processamento real de ate 2 faturas" }
+
+# Relatorios
+report = { cmd = "python scripts/report_processed.py", help = "Exibe o relatorio consolidado das faturas" }
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
