@@ -57,3 +57,28 @@ class AzureBlobStorage:
 
         download_stream = blob_client.download_blob()
         return download_stream.readall()
+
+    def list_pdfs(self) -> list[str]:
+        if not self.container_raw:
+            raise ValueError('AZURE_STORAGE_CONTAINER_RAW is not configured')
+
+        container_client = self.client.get_container_client(self.container_raw)
+
+        return sorted(
+            name
+            for name in container_client.list_blob_names()
+            if name.lower().endswith('.pdf')
+        )
+
+    def blob_exists(
+        self,
+        container_name: str,
+        blob_name: str,
+    ) -> bool:
+
+        blob_client = self.client.get_blob_client(
+            container=container_name,
+            blob=blob_name,
+        )
+
+        return blob_client.exists()

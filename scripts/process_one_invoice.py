@@ -1,3 +1,4 @@
+import argparse
 from pathlib import PurePosixPath
 
 from elis_procurement_v2.adapters.azure_blob_storage import (
@@ -12,9 +13,36 @@ from elis_procurement_v2.application.invoice_processor import (
 
 
 def main() -> None:
-    blob_name = 'NL_Alcochem Hygiene_pest control consumables.pdf'
+    parser = argparse.ArgumentParser(
+        description='Process a single invoice from Azure Blob Storage.'
+    )
+    parser.add_argument(
+        'blob_name',
+        help='PDF blob name in invoices-raw',
+    )
+
+    args = parser.parse_args()
+    blob_name = args.blob_name
 
     storage = AzureBlobStorage()
+    analyzer = AzureContentUnderstanding()
+
+    storage = AzureBlobStorage()
+
+    processed_container = storage.container_processed
+
+    if not processed_container:
+        raise ValueError('Processed container is not configured.')
+
+    processed_blob_name = str(PurePosixPath(blob_name).with_suffix('.json'))
+
+    if storage.blob_exists(
+        container_name=processed_container,
+        blob_name=processed_blob_name,
+    ):
+        print('Esta fatura já foi processada. Nenhuma análise será executada.')
+        return
+
     analyzer = AzureContentUnderstanding()
 
     print('1. Baixando PDF...')
@@ -25,8 +53,6 @@ def main() -> None:
 
     print('3. Processando fatura...')
     result = process_invoice(analysis)
-    processed_blob_name = f'{PurePosixPath(blob_name).stem}.json'
-    processed_container = storage.container_processed
 
     if processed_container is None:
         raise ValueError('Processed container is not configured.')

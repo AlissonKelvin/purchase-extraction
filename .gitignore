@@ -1,18 +1,17 @@
-# Credentials
+# Environment and credentials
 .env
 .env.*
 !.env.example
 
-# Confidential data
+# Confidential files and operation state
 data/private/
-tests/fixtures/private/
 
 # Python
+.venv/
 __pycache__/
 *.pyc
-.venv/
 
-# Test artifacts
+# Testing
 .pytest_cache/
 .ruff_cache/
 .coverage

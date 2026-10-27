@@ -77,3 +77,76 @@ def test_download_pdf(mock_from_connection_string, monkeypatch):
         container='invoices-raw',
         blob='example-invoice.pdf',
     )
+
+
+@patch(
+    'elis_procurement_v2.adapters.azure_blob_storage.'
+    'BlobServiceClient.from_connection_string'
+)
+def test_list_pdfs(mock_from_connection_string, monkeypatch):
+    monkeypatch.setenv(
+        'AZURE_STORAGE_CONNECTION_STRING',
+        'fictitious-connection-string',
+    )
+    monkeypatch.setenv(
+        'AZURE_STORAGE_CONTAINER_RAW',
+        'invoices-raw',
+    )
+    monkeypatch.setenv(
+        'AZURE_STORAGE_CONTAINER_PROCESSED',
+        'invoices-processed',
+    )
+
+    container_client = (
+        mock_from_connection_string.return_value.get_container_client.return_value
+    )
+
+    container_client.list_blob_names.return_value = [
+        'invoice-b.PDF',
+        'notes.txt',
+        'invoice-a.pdf',
+        'folder/invoice-c.pdf',
+    ]
+
+    storage = AzureBlobStorage()
+
+    result = storage.list_pdfs()
+
+    assert result == [
+        'folder/invoice-c.pdf',
+        'invoice-a.pdf',
+        'invoice-b.PDF',
+    ]
+
+    cast(Any, storage.client).get_container_client.assert_called_once_with(
+        'invoices-raw'
+    )
+
+    container_client.list_blob_names.assert_called_once_with()
+
+
+@patch(
+    'elis_procurement_v2.adapters.azure_blob_storage.'
+    'BlobServiceClient.from_connection_string'
+)
+def test_blob_exists(mock_from_connection_string, monkeypatch):
+    monkeypatch.setenv(
+        'AZURE_STORAGE_CONNECTION_STRING',
+        'fictitious-connection-string',
+    )
+
+    storage = AzureBlobStorage()
+
+    blob_client = mock_from_connection_string.return_value.get_blob_client.return_value
+
+    blob_client.exists.return_value = True
+
+    assert storage.blob_exists(
+        'invoices-processed',
+        'invoice-example.json',
+    )
+
+    cast(Any, storage.client).get_blob_client.assert_called_once_with(
+        container='invoices-processed',
+        blob='invoice-example.json',
+    )

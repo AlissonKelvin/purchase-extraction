@@ -22,7 +22,7 @@ class AzureContentUnderstanding:
             'Ocp-Apim-Subscription-Key': self.api_key,
         }
 
-    def analyze_pdf(self, pdf_bytes: bytes) -> dict[str, Any]:
+    def start_analysis(self, pdf_bytes: bytes) -> str:
         if not pdf_bytes:
             raise ValueError('PDF bytes cannot be empty.')
 
@@ -41,39 +41,63 @@ class AzureContentUnderstanding:
                 },
                 content=pdf_bytes,
             )
+
             response.raise_for_status()
 
             if response.status_code != 202:
-                raise RuntimeError(
-                    f'Unexpected status code: {response.status_code}. '
-                    f'Response: {response.text}'
-                )
-            opration_url = response.headers.get('Operation-Location')
+                raise RuntimeError(f'Unexpected analysis status: {response.status_code}')
 
-            if not opration_url:
-                raise RuntimeError(
-                    'Operation-Location header is missing in the response.'
-                )
+            operation_url = response.headers.get('Operation-Location')
 
-            for _ in range(40):
-                result_response = client.get(
-                    opration_url,
-                    params={'api-version': '2025-11-01'},
+            if not operation_url:
+                raise RuntimeError('Operation-Location header is missing.')
+
+            return operation_url
+
+    def get_analysis_result(
+        self,
+        operation_url: str,
+        max_attempts: int = 60,
+    ) -> dict[str, Any]:
+        if max_attempts < 1:
+            raise ValueError('max_attempts must be greater than zero.')
+
+        expected_prefix = f'{self.endpoint}/contentunderstanding/analyzerResults/'
+
+        if not operation_url.startswith(expected_prefix):
+            raise ValueError('Invalid Content Understanding operation URL.')
+
+        with httpx.Client(timeout=60.0) as client:
+            for attempt in range(max_attempts):
+                response = client.get(
+                    operation_url,
                     headers=self.headers,
                 )
-                result_response.raise_for_status()
+                response.raise_for_status()
 
-                result = result_response.json()
+                result = response.json()
                 status = str(result.get('status', '')).lower()
 
                 if status == 'succeeded':
                     if not result.get('result'):
-                        raise RuntimeError('Analysis succeeded without a result')
+                        raise RuntimeError('Analysis succeeded without a result.')
+
                     return result
 
-                if status in ('failed', 'canceled'):
+                if status in ('failed', 'canceled', 'cancelled'):
                     raise RuntimeError(f'Content Understanding analysis: {status}')
 
-                sleep(3)
+                if status not in ('running', 'notstarted'):
+                    raise RuntimeError(f'Unexpected analysis status: {status}')
 
-        raise TimeoutError('Content Understanding analysis did not finish in time.')
+                if attempt < max_attempts - 1:
+                    sleep(3)
+
+        raise TimeoutError(
+            'Content Understanding analysis is still pending. '
+            'The operation can be queried again.'
+        )
+
+    def analyze_pdf(self, pdf_bytes: bytes) -> dict[str, Any]:
+        operation_url = self.start_analysis(pdf_bytes)
+        return self.get_analysis_result(operation_url)
