@@ -24,6 +24,7 @@ def process_invoice(response: Mapping[str, Any]):
             'reconciliation_difference': invoice.reconciliation_difference,
             'reconciliation_status': invoice.reconciliation_status,
             'review_status': invoice.review_status,
+            'review_reasons': invoice.review_reasons,
             'line_items_count': len(invoice.line_items),
             'charges_count': len(invoice.charges),
             'line_items': [

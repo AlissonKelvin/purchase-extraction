@@ -192,3 +192,51 @@ def test_line_item_quantity_mismatch() -> None:
     )
 
     assert item.has_quantity_mismatch is True
+
+
+def test_review_reasons_for_invoice_total_mismatch():
+    invoice = Invoice(
+        invoice_total=Decimal('120'),
+        line_items=(
+            LineItem(
+                description='Example Product',
+                quantity=Decimal('2'),
+                unit_price=Decimal('50'),
+                line_amount=Decimal('100'),
+            ),
+        ),
+    )
+
+    assert invoice.review_reasons == ('invoice_total_mismatch',)
+
+
+def test_review_reasons_for_item_mismatch():
+    invoice = Invoice(
+        invoice_total=Decimal('90'),
+        line_items=(
+            LineItem(
+                description='Discounted Product',
+                quantity=Decimal('2'),
+                unit_price=Decimal('50'),
+                line_amount=Decimal('90'),
+            ),
+        ),
+    )
+
+    assert invoice.reconciliation_status == 'matched'
+    assert invoice.review_reasons == ('item_amount_mismatch',)
+
+
+def test_review_reasons_for_inconclusive_invoice():
+    invoice = Invoice(
+        line_items=(
+            LineItem(
+                description='Example Product',
+                quantity=Decimal('2'),
+                unit_price=None,
+                line_amount=None,
+            ),
+        ),
+    )
+
+    assert invoice.review_reasons == ('inconclusive_reconciliation',)

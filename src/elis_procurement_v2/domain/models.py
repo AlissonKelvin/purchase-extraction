@@ -97,3 +97,18 @@ class Invoice:
             return 'review_required'
 
         return 'no_issues_detected'
+
+    @property
+    def review_reasons(self) -> tuple[str, ...]:
+        reasons = []
+
+        if self.reconciliation_status == 'inconclusive':
+            reasons.append('inconclusive_reconciliation')
+
+        elif self.reconciliation_status == 'mismatched':
+            reasons.append('invoice_total_mismatch')
+
+        if self.has_item_mismatches:
+            reasons.append('item_amount_mismatch')
+
+        return tuple(reasons)

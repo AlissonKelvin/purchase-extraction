@@ -82,3 +82,35 @@ class AzureBlobStorage:
         )
 
         return blob_client.exists()
+
+    def list_processed_jsons(self) -> list[str]:
+        if not self.container_processed:
+            raise ValueError('Processed container is not configured.')
+
+        container_client = self.client.get_container_client(self.container_processed)
+
+        return sorted(
+            name
+            for name in container_client.list_blob_names()
+            if name.lower().endswith('.json')
+        )
+
+    def download_processed_json(
+        self,
+        blob_name: str,
+    ) -> dict[str, Any]:
+        if not self.container_processed:
+            raise ValueError('Processed container is not configured.')
+
+        blob_client = self.client.get_blob_client(
+            container=self.container_processed,
+            blob=blob_name,
+        )
+
+        content = blob_client.download_blob().readall()
+        data = json.loads(content)
+
+        if not isinstance(data, dict):
+            raise ValueError('Processed JSON must contain an object.')
+
+        return data

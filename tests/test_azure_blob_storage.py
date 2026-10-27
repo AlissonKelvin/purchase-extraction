@@ -150,3 +150,38 @@ def test_blob_exists(mock_from_connection_string, monkeypatch):
         container='invoices-processed',
         blob='invoice-example.json',
     )
+
+
+@patch(
+    'elis_procurement_v2.adapters.azure_blob_storage.'
+    'BlobServiceClient.from_connection_string'
+)
+def test_download_processed_json(
+    mock_from_connection_string,
+    monkeypatch,
+):
+    monkeypatch.setenv(
+        'AZURE_STORAGE_CONNECTION_STRING',
+        'fictitious-connection-string',
+    )
+    monkeypatch.setenv(
+        'AZURE_STORAGE_CONTAINER_PROCESSED',
+        'invoices-processed',
+    )
+
+    storage = AzureBlobStorage()
+
+    blob_client = mock_from_connection_string.return_value.get_blob_client.return_value
+
+    blob_client.download_blob.return_value.readall.return_value = (
+        b'{"reconciliation_status": "matched"}'
+    )
+
+    result = storage.download_processed_json('example.json')
+
+    assert result == {'reconciliation_status': 'matched'}
+
+    cast(Any, storage.client).get_blob_client.assert_called_once_with(
+        container='invoices-processed',
+        blob='example.json',
+    )
