@@ -1,6 +1,6 @@
-# ELIS Procurement v2
+# Procurement v2
 
-ELIS Procurement v2 is a Python pipeline that extracts structured procurement
+Procurement v2 is a Python pipeline that extracts structured procurement
 data from PDF invoices, reconciles invoice totals, and exports the results for
 review and downstream analysis. It uses Azure Blob Storage for input and output
 and Azure Content Understanding for document extraction.
@@ -189,7 +189,7 @@ the original invoice PDF.
 ## Project structure
 
 ```text
-src/elis_procurement_v2/
+src/_procurement_v2/
 |-- adapters/       Azure clients, response adapters, normalisation, and storage
 |-- application/    Processing, batching, reporting, export, and audit use cases
 `-- domain/         Invoice, line-item, charge, and reconciliation rules
