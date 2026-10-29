@@ -116,7 +116,7 @@ class BatchProcessor:
             return summary
 
         for index, (pdf_name, json_name) in enumerate(selected, start=1):
-            self.on_progress(f'Processando documento {index}/{len(selected)}...')
+            self.on_progress(f'Processing document {index}/{len(selected)}...')
 
             try:
                 operation = operations.get(pdf_name)
@@ -126,7 +126,7 @@ class BatchProcessor:
                         raise ValueError('Operation belongs to another analyzer.')
 
                     operation_url = operation['operation_url']
-                    self.on_progress('Recuperando análise anterior...')
+                    self.on_progress('Resuming previous analysis...')
 
                 else:
                     pdf_bytes = self.storage.download_pdf(pdf_name)
@@ -139,7 +139,7 @@ class BatchProcessor:
                     }
 
                     self.operation_storage.save(operations)
-                    self.on_progress('Nova análise registrada.')
+                    self.on_progress('New analysis registered.')
 
                 analysis = self.analyzer.get_analysis_result(operation_url)
 
@@ -156,18 +156,18 @@ class BatchProcessor:
 
                 summary.processed += 1
 
-                self.on_progress(f'Concluído: {result["reconciliation_status"]}')
+                self.on_progress(f'Completed: {result["reconciliation_status"]}')
 
             except TimeoutError:
                 if pdf_name in operations:
                     summary.timed_out += 1
-                    self.on_progress('Análise pendente. Operação preservada.')
+                    self.on_progress('Analysis pending. Operation state preserved.')
                 else:
                     summary.failed += 1
-                    self.on_progress('Timeout antes do registro da operação.')
+                    self.on_progress('Timed out before the operation was registered.')
 
             except Exception as error:
                 summary.failed += 1
-                self.on_progress(f'Falha: {type(error).__name__}')
+                self.on_progress(f'Failed: {type(error).__name__}')
 
         return summary

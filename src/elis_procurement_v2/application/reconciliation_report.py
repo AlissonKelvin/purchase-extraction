@@ -21,7 +21,7 @@ class ReconciliationReport:
     review_required: int = 0
     unrecognized: int = 0
 
-    # Novos indicadores
+    # Detailed indicators
     invoice_total_mismatch: int = 0
     item_amount_mismatch: int = 0
     inconclusive_reconciliation: int = 0
@@ -58,7 +58,7 @@ def build_reconciliation_report(
         reasons = result.get('review_reasons')
 
         if reasons is None:
-            # Compatibilidade com JSONs antigos.
+            # Backwards compatibility with legacy JSON files.
             reasons = []
 
             if status == 'mismatched':

@@ -10,26 +10,26 @@ def main() -> None:
     storage = AzureBlobStorage()
     report = build_reconciliation_report(storage)
 
-    print('--- Relatório de Reconciliação ---')
-    print(f'Total de JSONs: {report.total}')
+    print('--- Reconciliation Report ---')
+    print(f'Total JSON files: {report.total}')
     print(f'Matched: {report.matched}')
     print(f'Mismatched: {report.mismatched}')
     print(f'Inconclusive: {report.inconclusive}')
-    print(f'Outros status: {report.other}')
-    print(f'Revisão necessária: {report.review_required}')
-    print(f'JSONs não reconhecidos: {report.unrecognized}')
+    print(f'Other statuses: {report.other}')
+    print(f'Review required: {report.review_required}')
+    print(f'Unrecognised JSON files: {report.unrecognized}')
 
-    print('--- Motivos de revisão ---')
+    print('--- Review reasons ---')
     print(
-        'Diferença no total da fatura:',
+        'Invoice total mismatch:',
         report.invoice_total_mismatch,
     )
     print(
-        'Divergência matemática em itens:',
+        'Line item calculation mismatch:',
         report.item_amount_mismatch,
     )
     print(
-        'Reconciliação inconclusiva:',
+        'Inconclusive reconciliation:',
         report.inconclusive_reconciliation,
     )
 

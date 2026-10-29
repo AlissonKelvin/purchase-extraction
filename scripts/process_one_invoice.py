@@ -40,18 +40,18 @@ def main() -> None:
         container_name=processed_container,
         blob_name=processed_blob_name,
     ):
-        print('Esta fatura já foi processada. Nenhuma análise será executada.')
+        print('This invoice has already been processed. Analysis will be skipped.')
         return
 
     analyzer = AzureContentUnderstanding()
 
-    print('1. Baixando PDF...')
+    print('1. Downloading PDF...')
     pdf_bytes = storage.download_pdf(blob_name)
 
-    print('2. Analisando com Content Understanding...')
+    print('2. Analysing with Content Understanding...')
     analysis = analyzer.analyze_pdf(pdf_bytes)
 
-    print('3. Processando fatura...')
+    print('3. Processing invoice...')
     result = process_invoice(analysis)
 
     if processed_container is None:
@@ -63,13 +63,13 @@ def main() -> None:
         data=result,
     )
 
-    print('JSON enviado para invoices-processed!')
+    print('JSON uploaded to invoices-processed!')
 
-    print('--- Resultado ---')
-    print(f'Itens: {result["line_items_count"]}')
-    print(f'Cobranças: {result["charges_count"]}')
-    print(f'Reconciliação: {result["reconciliation_status"]}')
-    print(f'Revisão: {result["review_status"]}')
+    print('--- Result ---')
+    print(f'Line items: {result["line_items_count"]}')
+    print(f'Charges: {result["charges_count"]}')
+    print(f'Reconciliation: {result["reconciliation_status"]}')
+    print(f'Review: {result["review_status"]}')
 
 
 if __name__ == '__main__':

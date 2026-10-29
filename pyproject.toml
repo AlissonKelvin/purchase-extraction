@@ -1,7 +1,7 @@
 [project]
 name = "elis-procurement-v2"
 version = "0.1.0"
-description = "Add your description here"
+description = "Invoice extraction, reconciliation, and procurement data export pipeline"
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
@@ -38,20 +38,26 @@ quote-style = "single"
 
 [tool.taskipy.tasks]
 
-# Qualidade do código
-format = { cmd = "ruff format .", help = "Formata o codigo Python" }
-lint = { cmd = "ruff check .", help = "Verifica problemas com Ruff" }
-fix = { cmd = "ruff check . --fix", help = "Corrige problemas identificados pelo Ruff" }
-check = { cmd = "ruff format --check . && ruff check .", help = "Valida formatacao e lint" }
-test = { cmd = "pytest --cov=elis_procurement_v2 --cov-report=term-missing --cov-report=html", help = "Executa os testes com cobertura" }
+# Code quality
+format = { cmd = "ruff format .", help = "Format the Python code" }
+lint = { cmd = "ruff check .", help = "Check the code with Ruff" }
+fix = { cmd = "ruff check . --fix", help = "Fix issues reported by Ruff" }
+check = { cmd = "ruff format --check . && ruff check .", help = "Validate formatting and lint rules" }
+test = { cmd = "pytest --cov=elis_procurement_v2 --cov-report=term-missing --cov-report=html", help = "Run the test suite with coverage" }
 
-# Processamento das faturas
-invoice = { cmd = "python scripts/process_one_invoice.py", help = "Processa uma fatura informada por argumento" }
-batch = { cmd = "python scripts/process_batch.py", help = "Simula o processamento em lote" }
-batch_run = { cmd = "python scripts/process_batch.py --execute", help = "Executa processamento real de ate 2 faturas" }
+# Invoice processing
+invoice = { cmd = "python scripts/process_one_invoice.py", help = "Process the invoice passed as an argument" }
+batch = { cmd = "python scripts/process_batch.py", help = "Preview a batch run without processing invoices" }
+batch_run = { cmd = "python scripts/process_batch.py --execute", help = "Process up to two invoices" }
 
-# Relatorios
-report = { cmd = "python scripts/report_processed.py", help = "Exibe o relatorio consolidado das faturas" }
+# Reports
+report = { cmd = "python scripts/report_processed.py", help = "Display the consolidated invoice report" }
+
+# Export
+export = { cmd = "python scripts/export_procurement.py", help = "Export the proof-of-concept data to CSV" }
+
+# Audit
+audit_csv = { cmd = "python scripts/audit_procurement_csv.py", help = "Audit the exported proof-of-concept CSV files" }
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

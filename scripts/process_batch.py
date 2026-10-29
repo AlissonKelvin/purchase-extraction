@@ -40,21 +40,21 @@ def main() -> None:
         execute=args.execute,
     )
 
-    print('--- Resumo do lote ---')
-    print(f'PDFs encontrados: {summary.total_pdfs}')
-    print(f'Já processados: {summary.already_processed}')
-    print(f'Pendentes: {summary.pending}')
-    print(f'Selecionados: {summary.selected}')
-    print(f'Operações recuperáveis: {summary.recoverable}')
+    print('--- Batch summary ---')
+    print(f'PDFs found: {summary.total_pdfs}')
+    print(f'Already processed: {summary.already_processed}')
+    print(f'Pending: {summary.pending}')
+    print(f'Selected: {summary.selected}')
+    print(f'Recoverable operations: {summary.recoverable}')
 
     if not args.execute:
-        print('Modo simulação: nenhuma análise foi executada.')
+        print('Dry-run mode: no analysis was performed.')
         return
 
-    print('--- Resultado final ---')
-    print(f'Processados: {summary.processed}')
-    print(f'Ainda em análise: {summary.timed_out}')
-    print(f'Falhas: {summary.failed}')
+    print('--- Final result ---')
+    print(f'Processed: {summary.processed}')
+    print(f'Still being analysed: {summary.timed_out}')
+    print(f'Failed: {summary.failed}')
 
 
 if __name__ == '__main__':
